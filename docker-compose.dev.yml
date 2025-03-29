@@ -1,0 +1,46 @@
+services:
+
+  #  Backend service
+  backend:
+    container_name: backend
+    build:
+      context: ./services/backend/
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8081:4000"
+    volumes:
+      - ./logs:/app/logs
+    command: [ "sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 4000" ]
+    depends_on:
+      postgres_app:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: always
+
+  #  Postgres Service for Backend
+  postgres_app:
+    image: postgres:15
+    container_name: postgres_app
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./volumes/postgres_app:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${SERVICE_PG_USER}
+      POSTGRES_PASSWORD: ${SERVICE_PG_PASSWORD}
+      POSTGRES_DB: ${SERVICE_PG_DB}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${SERVICE_PG_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
