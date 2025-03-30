@@ -181,3 +181,4 @@ test.ipynb
 *.svg
 # *.ttf
 # *.pptx
+/.idea/
