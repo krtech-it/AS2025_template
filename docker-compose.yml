@@ -1,5 +1,20 @@
 services:
 
+  #  Frontend service
+  frontend:
+    container_name: frontend
+    build:
+      context: ./services/frontend/
+      dockerfile: docker/container/front/Dockerfile
+    #    env_file:
+    #      - .env
+    command: "nginx -g 'daemon off;'"
+    restart: on-failure
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
   #  Backend service
   backend:
     container_name: backend
